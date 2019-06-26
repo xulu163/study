@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wolves.tolink.mapper.TeacherMapper">
+
+    <resultMap id="BaseResultMap" type="com.wolves.tolink.dto.TeacherViewDTO">
+        <id column="id" property="id" jdbcType="VARCHAR" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="sex" property="sex" jdbcType="INTEGER" />
+        <result column="age" property="age" jdbcType="INTEGER" />
+        <result column="address" property="address" jdbcType="VARCHAR" />
+        <result column="native_place" property="nativePlace" jdbcType="VARCHAR" />
+        <result column="tel" property="tel" jdbcType="VARCHAR" />
+        <result column="pwd" property="pwd" jdbcType="VARCHAR" />
+        <result column="school_id" property="schoolId" jdbcType="INTEGER" />
+        <result column="clazz_id" property="clazzId" jdbcType="INTEGER" />
+        <result column="school_name" property="schoolName" jdbcType="VARCHAR" />
+        <result column="clazz_name" property="clazzName" jdbcType="VARCHAR" />
+        <result column="user_id" property="userId" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <sql id="base_sql">
+        `id`, `name`, `sex`, `age`, `address`, `native_place`, `tel`, `school_id`, `clazz_id`,`user_id`, `create_time`, `update_time`
+    </sql>
+
+    <sql id="condition">
+        <if test="teacherId != null and teacherId != ''">
+            and t.id = #{teacherId, jdbcType=VARCHAR}
+        </if>
+        <if test="teacherName != null and teacherName != ''">
+            and t.`name` = #{teacherName, jdbcType=VARCHAR}
+        </if>
+        <if test="sex != null">
+            and t.`sex` = #{sex, jdbcType=INTEGER}
+        </if>
+        <if test="ageStart != null">
+            and t.`age` >= #{ageStart, jdbcType=INTEGER}
+        </if>
+        <if test="ageEnd != null">
+            and t.`age` &lt;= #{ageEnd, jdbcType=INTEGER}
+        </if>
+        <if test="schoolId != null">
+            and t.`school_id` = #{schoolId, jdbcType=INTEGER}
+        </if>
+        <if test="clazzId != null">
+            and t.`clazz_id` = #{clazzId, jdbcType=INTEGER}
+        </if>
+        <if test="placeNative != null and placeNative != ''">
+            and t.`native_place` = #{placeNative, jdbcType=VARCHAR}
+        </if>
+        <if test="address != null and address != ''">
+            and t.`address` = #{address, jdbcType=VARCHAR}
+        </if>
+        <if test="tel != null and tel != ''">
+            and t.`tel` = #{tel, jdbcType=VARCHAR}
+        </if>
+        <if test="createTimeStart != null">
+            and t.`create_time` >= #{createTimeStart, jdbcType=TIMESTAMP}
+        </if>
+        <if test="createTimeEnd != null">
+            and t.`create_time` &lt;= #{createTimeEnd, jdbcType=TIMESTAMP}
+        </if>
+    </sql>
+
+    <select id="selectByCondition" parameterType="com.wolves.tolink.dto.TeaQueryDTO" resultMap="BaseResultMap">
+        select t.*,s.name as school_name,c.name as clazz_name, tc.pwd as pwd from teacher t
+          left join school s on t.school_id=s.id
+          left join clazz c on t.clazz_id=c.id
+          left join `user` tc on t.user_id=tc.id
+        where 1 = 1
+        <include refid="condition" />
+        order by t.${orderColumn} ${orderIndex}
+        limit #{page, jdbcType=INTEGER}, #{size, jdbcType=INTEGER}
+    </select>
+
+    <select id="selectCountByCondition" parameterType="com.wolves.tolink.dto.TeaQueryDTO" resultType="java.lang.Integer">
+        select count(*) from teacher t
+        left join school s on t.school_id=s.id
+        left join clazz c on t.clazz_id=c.id
+        left join `user` tc on t.user_id=tc.id
+        where 1 = 1
+        <include refid="condition" />
+    </select>
+
+</mapper>

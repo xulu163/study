@@ -1,0 +1,46 @@
+﻿server:
+    port: 8888
+spring:
+    thymeleaf:
+        cache: false
+        enabled: false
+    application:
+        name: bees
+    datasource:
+        url: jdbc:mysql://47.97.165.203:3306/stu?autoReconnect=true&zeroDateTimeBehavior=convertToNull&useUnicode=true&amp;characterEncoding=utf-8
+        username: root
+        password: Mysql762
+        driver-class-name: com.mysql.jdbc.Driver
+        initial-size: 20
+        max-active: 100
+        max-idle: 5
+        max-wait: 10000
+        min-idle: 1
+        testOnBorrow: true
+        validationQuery: SELECT 1
+    redis:
+        database: 0
+        password: 123456
+        timeout: 10000
+        pool:
+            max-active: 8
+            max-idle: 8
+            max-wait: -1
+            min-idle: 0
+        cluster:
+            nodes:
+                - 192.168.136.133:6379
+                - 192.168.136.134:6379
+                - 192.168.136.132:6379
+
+## 日志支持
+logging:
+    file: ./log/study.log
+    level:
+        com:
+            angrywolves: WARN
+        java:
+            sql: INFO
+mybatis: 
+    mapperLocations: classpath:mybatis/*.xml
+    typeAliasesPackage: com.wolves.tolink

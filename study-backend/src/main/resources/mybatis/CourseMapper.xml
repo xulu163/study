@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wolves.tolink.mapper.CourseMapper">
+
+    <resultMap id="BaseResultMap" type="com.wolves.tolink.entity.Course">
+        <id column="id" property="id" jdbcType="VARCHAR" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <resultMap id="ResultDtoMap" type="com.wolves.tolink.dto.CourseDTO">
+        <id column="id" property="id" jdbcType="VARCHAR" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="score" property="score" jdbcType="DOUBLE" />
+        <result column="stu_course_id" property="stuCourseId" jdbcType="INTEGER" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <select id="selectByTeacherId" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select t.* from course t left join teacher_course tc
+        on tc.course_id = t.id
+        where tc.teacher_id = #{teacherId, jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectByStudentId" parameterType="java.lang.String" resultMap="ResultDtoMap">
+        select t.*, tc.score, tc.id as stu_course_id from course t left join student_course tc
+        on tc.course_id = t.id
+        where tc.stu_id = #{stuId, jdbcType=VARCHAR}
+    </select>
+
+    <sql id="condition">
+        <if test="stuId != null and stuId != ''">
+            and sc.`stu_id` = #{stuId, jdbcType=VARCHAR}
+        </if>
+        <if test="stuName != null and stuName != ''">
+            and s.`name` = #{stuName, jdbcType=VARCHAR}
+        </if>
+        <if test="sex != null">
+            and s.`sex` = #{sex, jdbcType=INTEGER}
+        </if>
+        <if test="ageStart != null">
+            and s.`age` >= #{ageStart, jdbcType=INTEGER}
+        </if>
+        <if test="ageEnd != null">
+            and s.`age` &lt;= #{ageEnd, jdbcType=INTEGER}
+        </if>
+        <if test="schoolId != null">
+            and sl.`school_id` = #{schoolId, jdbcType=INTEGER}
+        </if>
+        <if test="clazzId != null">
+            and cz.`id` = #{clazzId, jdbcType=INTEGER}
+        </if>
+        <if test="courseId != null">
+            and sc.`course_id` = #{courseId, jdbcType=INTEGER}
+        </if>
+        <if test="teacherName != null and teacherName != ''">
+            and t.`name` = #{teacherName, jdbcType=VARCHAR}
+        </if>
+        <if test="createTimeStart != null">
+            and sc.`create_time` >= #{createTimeStart, jdbcType=TIMESTAMP}
+        </if>
+        <if test="createTimeEnd != null">
+            and sc.`create_time` &lt;= #{createTimeEnd, jdbcType=TIMESTAMP}
+        </if>
+        <if test="teacherId != null and teacherId != ''">
+            and t.`id` = #{teacherId, jdbcType=VARCHAR}
+        </if>
+    </sql>
+
+    <select id="selectByCondition" parameterType="com.wolves.tolink.dto.CourseQueryDTO" resultType="com.wolves.tolink.dto.CourseResultDTO">
+      select sc.stu_id as stuId, s.name as stuName, s.sex, s.age, sl.name as schoolName, cz.name as clazzName,
+      sc.score, t.name as teacherName, sc.create_time as createTime, cs.name as courseName
+      from student_course sc
+        left join student s on sc.stu_id=s.id
+        left join course cs on cs.id=sc.course_id
+        left join teacher t on s.teacher_id=t.id
+        left join school sl on s.school_id=sl.id
+        left join clazz cz on s.clazz_id=cz.id
+      where s.id is not null
+      <include refid="condition" />
+      order by
+      <if test="orderColumn == 'id'">
+          cs.`id`
+      </if>
+      <if test="orderColumn == 'age'">
+          s.`age`
+      </if>
+      <if test="orderColumn == 'score'">
+          sc.`score`
+      </if>
+      <if test="orderColumn == 'create_time'">
+          sc.`create_time`
+      </if>
+      <if test="orderColumn == 'course_id'">
+          sc.`course_id`
+      </if>
+        ${orderIndex}
+      limit #{page, jdbcType=INTEGER}, #{size, jdbcType=INTEGER}
+    </select>
+
+    <select id="selectCountByCondition" parameterType="com.wolves.tolink.dto.CourseQueryDTO" resultType="java.lang.Integer">
+    select count(1)
+      from student_course sc
+        left join student s on sc.stu_id=s.id
+        left join teacher t on s.teacher_id=t.id
+        left join school sl on s.school_id=sl.id
+        left join clazz cz on s.clazz_id=cz.id
+      where s.id is not null
+        <include refid="condition" />
+    </select>
+</mapper>

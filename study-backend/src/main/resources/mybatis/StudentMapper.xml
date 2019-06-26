@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wolves.tolink.mapper.StudentMapper">
+
+    <resultMap id="BaseResultMap" type="com.wolves.tolink.dto.StudentViewDTO">
+        <id column="id" property="id" jdbcType="VARCHAR" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="sex" property="sex" jdbcType="INTEGER" />
+        <result column="age" property="age" jdbcType="INTEGER" />
+        <result column="address" property="address" jdbcType="VARCHAR" />
+        <result column="place_native" property="placeNative" jdbcType="VARCHAR" />
+        <result column="tel" property="tel" jdbcType="VARCHAR" />
+        <result column="entry_time" property="entryTime" jdbcType="TIMESTAMP" />
+        <result column="school_id" property="schoolId" jdbcType="INTEGER" />
+        <result column="clazz_id" property="clazzId" jdbcType="INTEGER" />
+        <result column="teacher_id" property="teacherId" jdbcType="VARCHAR" />
+        <result column="total_score" property="totalScore" jdbcType="DOUBLE" />
+        <result column="avg_score" property="avgScore" jdbcType="DOUBLE" />
+        <result column="total_course" property="totalCourse" jdbcType="INTEGER" />
+        <result column="school_name" property="schoolName" jdbcType="VARCHAR" />
+        <result column="clazz_name" property="clazzName" jdbcType="VARCHAR" />
+        <result column="teacher_name" property="teacherName" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <sql id="base_sql">
+        `id`, `name`, `sex`, `age`, `address`, `place_native`, `tel`, `entry_time`, `school_id`, `clazz_id`, `teacher_id`, `total_score`,
+        `avg_score`, `total_course`, `create_time`, `update_time`
+    </sql>
+
+    <sql id="condition">
+        <if test="stuId != null and stuId != ''">
+            and t.id = #{stuId, jdbcType=VARCHAR}
+        </if>
+        <if test="stuName != null and stuName != ''">
+            and t.`name` = #{stuName, jdbcType=VARCHAR}
+        </if>
+        <if test="sex != null">
+            and t.`sex` = #{sex, jdbcType=INTEGER}
+        </if>
+        <if test="ageStart != null">
+            and t.`age` >= #{ageStart, jdbcType=INTEGER}
+        </if>
+        <if test="ageEnd != null">
+            and t.`age` &lt;= #{ageStart, jdbcType=INTEGER}
+        </if>
+        <if test="schoolId != null">
+            and t.`school_id` = #{schoolId, jdbcType=INTEGER}
+        </if>
+        <if test="clazzId != null">
+            and t.`clazz_id` = #{clazzId, jdbcType=INTEGER}
+        </if>
+        <if test="placeNative != null and placeNative != ''">
+            and t.`place_native` = #{placeNative, jdbcType=VARCHAR}
+        </if>
+        <if test="address != null and address != ''">
+            and t.`address` = #{address, jdbcType=VARCHAR}
+        </if>
+        <if test="tel != null and tel != ''">
+            and t.`tel` = #{tel, jdbcType=VARCHAR}
+        </if>
+        <if test="teacherName != null and teacherName != ''">
+            and tc.`name` = #{teacherName, jdbcType=VARCHAR}
+        </if>
+        <if test="avgScoreStart != null">
+            and t.`avg_score` >= #{avgScoreStart, jdbcType=DOUBLE}
+        </if>
+        <if test="avgScoreEnd != null">
+            and t.`avg_score` &lt;= #{avgScoreEnd, jdbcType=DOUBLE}
+        </if>
+        <if test="totalScoreStart != null">
+            and t.`total_score` >= #{totalScoreStart, jdbcType=DOUBLE}
+        </if>
+        <if test="totalScoreEnd != null">
+            and t.`total_score` &lt;= #{totalScoreEnd, jdbcType=DOUBLE}
+        </if>
+        <if test="totalCourseStart != null">
+            and t.`total_course` >= #{totalCourseStart, jdbcType=INTEGER}
+        </if>
+        <if test="totalCourseEnd != null">
+            and t.`total_course` &lt;= #{totalCourseEnd, jdbcType=INTEGER}
+        </if>
+        <if test="entryTimeStart != null">
+            and t.`entry_time` >= #{entryTimeStart, jdbcType=TIMESTAMP}
+        </if>
+        <if test="entryTimeEnd != null">
+            and t.`entry_time` &lt;= #{entryTimeEnd, jdbcType=TIMESTAMP}
+        </if>
+        <if test="createTimeStart != null">
+            and t.`create_time` >= #{createTimeStart, jdbcType=TIMESTAMP}
+        </if>
+        <if test="createTimeEnd != null">
+            and t.`create_time` &lt;= #{createTimeEnd, jdbcType=TIMESTAMP}
+        </if>
+        <if test="teacherId != null and teacherId !=''">
+            and t.`teacher_id` = #{teacherId, jdbcType=VARCHAR}
+        </if>
+    </sql>
+
+    <select id="selectByCondition" parameterType="com.wolves.tolink.dto.StuQueryDTO" resultMap="BaseResultMap">
+        select t.*,s.name as school_name,c.name as clazz_name, tc.name as teacher_name from student t
+            left join school s on t.school_id=s.id
+            left join clazz c on t.clazz_id=c.id
+            left join teacher tc on t.teacher_id=tc.id
+            where 1 = 1
+              <include refid="condition" />
+         order by
+          t.`${orderColumn}` ${orderIndex}
+        limit #{page, jdbcType=INTEGER}, #{size, jdbcType=INTEGER};
+    </select>
+
+    <select id="selectCountByCondition" parameterType="com.wolves.tolink.dto.StuQueryDTO" resultType="java.lang.Integer">
+        select count(*) from student t
+        left join school s on t.school_id=s.id
+        left join clazz c on t.clazz_id=c.id
+        left join teacher tc on t.teacher_id=tc.id
+        where 1 = 1
+        <include refid="condition" />
+    </select>
+
+</mapper>
